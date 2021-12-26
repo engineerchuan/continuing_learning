@@ -27,9 +27,43 @@ def approximate_matches(pattern, genome, d):
     # Input: Strings Pattern and Text along with an integer d.
     # Output: All starting positions where Pattern appears as a substring of Text with at most d mismatches.
     matches = []
-    for i in range(len(genome) - len(pattern) + 1):
+    for i in range(len(genome) - len(pattern) + 1):  # len(genome)
         sliced_genome = genome[i:i+len(pattern)]
-        hd = hamming_distance(sliced_genome, pattern)
+        hd = hamming_distance(sliced_genome, pattern)  # O(len(pattern))
         if hd <= d:
             matches.append(i)
     return matches
+
+def approximate_matches_count(pattern, genome, d):
+    approx_matches = approximate_matches(pattern, genome, d)
+    return len(approx_matches)
+
+def neighbors(pattern, d):
+    if d == 0:
+        return [pattern]
+    else:
+        recursive = neighbors(pattern, d-1)
+        ans = [pattern]
+        for patt in recursive:
+            for i in range(len(patt)):
+                s = [x for x in ['A','T','G','C'] if x != patt[i]]
+                for letter in s:
+                    newpatt = [x for x in patt]
+                    newpatt[i] = letter
+                    ans.append(''.join(newpatt))
+        return list(set(ans))
+
+
+def frequent_words_with_mismatches(genome, k, d):
+    # k length of the mer
+    freqMap = dict()
+    for i in range(len(genome) - k + 1):
+        pattern = genome[i:i+k]
+        neighborhood = neighbors(pattern, d)
+        for neighbor in neighborhood:
+            if neighbor not in freqMap:
+                freqMap[neighbor] = 0
+            freqMap[neighbor] += 1
+    max_freq = max([freqMap[k] for k in freqMap])
+    return [k for k in freqMap if freqMap[k] == max_freq]
+    
