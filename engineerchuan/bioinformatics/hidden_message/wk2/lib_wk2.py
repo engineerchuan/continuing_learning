@@ -54,7 +54,7 @@ def neighbors(pattern, d):
         return list(set(ans))
 
 
-def frequent_words_with_mismatches(genome, k, d):
+def frequent_words_with_mismatches_build_map(genome, k, d):
     # k length of the mer
     freqMap = dict()
     for i in range(len(genome) - k + 1):
@@ -64,6 +64,34 @@ def frequent_words_with_mismatches(genome, k, d):
             if neighbor not in freqMap:
                 freqMap[neighbor] = 0
             freqMap[neighbor] += 1
+    return freqMap
+
+def frequent_words_with_mismatches(genome, k, d):
+    freqMap = frequent_words_with_mismatches_build_map(genome, k, d)
     max_freq = max([freqMap[k] for k in freqMap])
     return [k for k in freqMap if freqMap[k] == max_freq]
     
+
+def complement(genome):
+    complementary_pairs = {
+        'A' : 'T',
+        'T' : 'A',
+        'G' : 'C',
+        'C' : 'G',
+    }
+    return ''.join([complementary_pairs[x] for x in genome][::-1])
+
+def frequent_words_with_mismatches_plus_complement(genome, k, d):
+    freqMap1 = frequent_words_with_mismatches_build_map(genome, k, d)
+    freqMap2 = frequent_words_with_mismatches_build_map(complement(genome), k, d)
+
+    mergedFreqMap = {k:freqMap1[k] for k in freqMap1}
+    for k in freqMap2:
+        if k in mergedFreqMap:
+            mergedFreqMap[k] += freqMap2[k]
+        else:
+            mergedFreqMap[k] = freqMap2[k]
+            
+
+    max_freq = max([mergedFreqMap[k] for k in mergedFreqMap])
+    return [k for k in mergedFreqMap if mergedFreqMap[k] == max_freq]

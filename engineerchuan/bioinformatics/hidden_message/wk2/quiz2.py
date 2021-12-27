@@ -1,0 +1,10 @@
+from lib_wk2 import *
+
+# Question 1
+print(hamming_distance('CTTGAAGTGGACCTCTAGTTCCTCTACAAAGAACAGGTTGACCTGTCGCGAAG', 'ATGCCTTACCTAGATGCAATGACGGACGTATTCCTTTTGCCTCAACGGCTCCT'))
+
+# Question 2
+print(minimum_skew('CATTCCAGTACTTCGATGATGGCGTGAAGA'))
+print(approximate_matches_count('TGT', 'CGTGACAGTGTATGGGCATCTTT', 1))
+
+print(len(neighbors('ACGT', 3)))
