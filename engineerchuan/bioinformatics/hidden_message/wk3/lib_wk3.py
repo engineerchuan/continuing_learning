@@ -86,6 +86,46 @@ def motif_find_brute_force(k, d, dnas):
             final_patterns.append(pattern)
     return final_patterns
 
+def compute_scores(motif):
+    # motif is a list of lists
+    # dimension 1 is # of motifs
+    # dimension 2 is length of motifs
+    # return a score of form A,T,C,G as a list of lists
+    n_strands = len(motif)
+    n_len = len(motif[0])
+    scores = {
+        'A': [0 for i in range(n_len)],
+        'C': [0 for i in range(n_len)],
+        'G': [0 for i in range(n_len)],
+        'T': [0 for i in range(n_len)],
+    }
+    for i_motif in range(n_strands):
+        for j in range(n_len):
+            scores[motif[i_motif][j]][j] += 1
+    return scores
+
+import math
+
+def compute_entropy(motif):
+    scores = compute_scores(motif)
+    n_len = len(scores['A'])
+    total_entropy = 0
+    for i in range(n_len):
+        total = scores['A'][i] + scores['T'][i] + scores['C'][i] + scores['G'][i]
+        for v in ['A', 'T', 'C', 'G']:
+            p = scores[v][i] *1.0 / total
+            if p > 0:
+                total_entropy += p * math.log(p, 2)
+    total_entropy = total_entropy * -1
+    return total_entropy
+
+    
+    
+
+
+
+
+
 
 def exercise_01_02_b():
     # motif finding
@@ -98,6 +138,23 @@ def exercise_01_02_b():
         dnas = fid.readline().strip().split(' ')
         print(' '.join(motif_find_brute_force(k, d, dnas)))
 
-exercise_01_02_b()
+
+
+def exercise_01_03_c():
+    motif = [
+        'TCGGGGGTTTTT',
+        'CCGGTGACTTAC',
+        'ACGGGGATTTTC',
+        'TTGGGGACTTTT',
+        'AAGGGGACTTCC',
+        'TTGGGGACTTCC',
+        'TCGGGGATTCAT',
+        'TCGGGGATTCCT',
+        'TAGGGGAACTAC',
+        'TCGGGTATAACC',        
+    ]
+    print(compute_scores(motif))
+    print(compute_entropy(motif))
+exercise_01_03_c()
 
 
