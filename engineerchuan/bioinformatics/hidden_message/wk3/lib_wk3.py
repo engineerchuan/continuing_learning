@@ -113,7 +113,7 @@ def compute_scores_total(motif):
     return score
 
 
-def compute_profile(motif):
+def compute_profile(motif, padding=0):
     # motif is a list of lists
     # dimension 1 is # of motifs
     # dimension 2 is length of motifs
@@ -124,7 +124,7 @@ def compute_profile(motif):
     for i in range(n_len):
         total = scores['A'][i] + scores['T'][i] + scores['C'][i] + scores['G'][i]
         for v in ['A', 'T', 'C', 'G']:
-            profile[v].append(scores[v][i] *1.0 / total)
+            profile[v].append((padding + scores[v][i]) *1.0 / (total + 4 * padding))
             
     return profile
 
@@ -250,14 +250,14 @@ def exercise_01_05_a():
         test_profile['T'] = [float(x) for x in fid.readline().strip().split(' ')]
         print(most_probable_kmer(text, k, test_profile))
 
-def greedy_motif_search(dnas, k, t):
+def greedy_motif_search(dnas, k, t, padding=0):
     # initialize the motifs
     best_motifs = [dna[:k] for dna in dnas]
     for i in range(len(dnas[0]) - k + 1):
         motifs = [dnas[0][i:i+k]] # seed it with the first one
         for j in range(1, t):
             #print(motifs)
-            profile = compute_profile(motifs)
+            profile = compute_profile(motifs, padding=padding)
             (p, kmer) = most_probable_kmer(dnas[j], k, profile)
             motifs.append(kmer)
         #print(motifs)
@@ -278,4 +278,23 @@ def exercise_01_05_b():
         dnas = fid.readline().strip().split(' ')        
         print(' '.join(greedy_motif_search(dnas, k, t)))
 
-exercise_01_05_b()
+#exercise_01_05_b()
+
+
+def exercise_01_05_c():
+
+    k = 3
+    t = 5
+    dnas = ['GGCGTTCAGGCA', 'AAGAATCAGTCA', 'CAAGGAGTTCGC', 'CACGTCAATCAC', 'CAATAATATTCG']
+
+    with codecs.open('data/dataset_160_9.txt', encoding='utf-8') as fid:
+        __ = fid.readline().strip().split(' ')
+        k = int(__[0])
+        t = int(__[1])
+        dnas = fid.readline().strip().split(' ')        
+        print(' '.join(greedy_motif_search(dnas, k, t, padding=1)))
+
+def quiz():
+    print(median_string(7, ['CTCGATGAGTAGGAAAGTAGTTTCACTGGGCGAACCACCCCGGCGCTAATCCTAGTGCCC', 'GCAATCCTACCCGAGGCCACATATCAGTAGGAACTAGAACCACCACGGGTGGCTAGTTTC', 'GGTGTTGAACCACGGGGTTAGTTTCATCTATTGTAGGAATCGGCTTCAAATCCTACACAG']))
+    print(0.4 * 0.3 * 1.0 * 0.4 * 0.5 * 0.1)
+print(quiz())
