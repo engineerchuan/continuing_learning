@@ -104,6 +104,31 @@ def compute_scores(motif):
             scores[motif[i_motif][j]][j] += 1
     return scores
 
+def compute_scores_total(motif):
+    score = 0
+    scores = compute_scores(motif)
+    for i in range(len(scores['A'])):
+        t = [scores['A'][i], scores['C'][i],scores['T'][i],scores['G'][i]]
+        score += sum(t) - max(t)
+    return score
+
+
+def compute_profile(motif):
+    # motif is a list of lists
+    # dimension 1 is # of motifs
+    # dimension 2 is length of motifs
+    # return a score of form A,T,C,G as a list of lists
+    scores = compute_scores(motif)
+    n_len = len(scores['A'])
+    profile = {'A':[], 'G':[], 'C':[], 'T':[]}
+    for i in range(n_len):
+        total = scores['A'][i] + scores['T'][i] + scores['C'][i] + scores['G'][i]
+        for v in ['A', 'T', 'C', 'G']:
+            profile[v].append(scores[v][i] *1.0 / total)
+            
+    return profile
+
+
 import math
 
 def compute_entropy(motif):
@@ -119,8 +144,34 @@ def compute_entropy(motif):
     total_entropy = total_entropy * -1
     return total_entropy
 
-    
-    
+def kmerdist(pattern, dnas):
+    def helper(pattern, dna):
+        minDist = 10000000
+        for i in range(len(dna) - len(pattern) + 1):
+            computed = hamming_distance(pattern, dna[i:i+len(pattern)])
+            if computed < minDist:
+                minDist = computed
+        return minDist
+    return sum([helper(pattern, dna) for dna in dnas])
+
+
+def median_string(k, dnas):
+    # generate all possible k-mers from dnas
+
+    patterns = []
+    for dna in dnas:
+        for i in range(len(dna) - k + 1):
+            patterns.append(dna[i:i+k])
+    patterns = list(set(patterns))
+    distance = 10000000000000
+    median_pattern = None
+    for pattern in patterns:
+        computed_dist = kmerdist(pattern, dnas)
+        if distance > computed_dist:
+            distance = computed_dist
+            median_pattern = pattern
+    return (distance, median_pattern)
+
 
 
 
@@ -155,6 +206,76 @@ def exercise_01_03_c():
     ]
     print(compute_scores(motif))
     print(compute_entropy(motif))
-exercise_01_03_c()
 
+def exercise_01_04_a():
+    k = 3
+    dnas = ['AAATTGACGCAT','GACGACCACGTT','CGTCAGCGCCTG','GCTGAGCACCGG','AGTTCGGGACAG']
 
+    with codecs.open('data/dataset_158_9.txt', encoding='utf-8') as fid:
+        k = int(fid.readline().strip())
+        dnas = fid.readline().strip().split(' ')
+        print(median_string(k, dnas))
+
+def most_probable_kmer(text, k, profile):
+    # profile is a map.
+    maxp = -1
+    found = None
+    for i in range(len(text) - k + 1):
+        sliced = text[i:i+k]
+        p = 1.0
+        for i in range(len(sliced)):
+            p *= profile[sliced[i]][i]
+        if p > maxp:
+            maxp = p
+            found = sliced
+
+    return (p, found)
+
+def exercise_01_05_a():
+    test_profile = {
+        'A': [0.2, 0.2, 0.3, 0.2, 0.3],
+        'C': [0.4, 0.3, 0.1, 0.5, 0.1],
+        'G': [0.3, 0.3, 0.5, 0.2, 0.4],
+        'T': [0.1, 0.2, 0.1, 0.1, 0.2],
+    }
+
+    with codecs.open('data/dataset_159_3.txt', encoding='utf-8') as fid:
+        
+        text = fid.readline().strip()
+        k = int(fid.readline().strip())
+        test_profile = dict()
+        test_profile['A'] = [float(x) for x in fid.readline().strip().split(' ')]
+        test_profile['C'] = [float(x) for x in fid.readline().strip().split(' ')]
+        test_profile['G'] = [float(x) for x in fid.readline().strip().split(' ')]
+        test_profile['T'] = [float(x) for x in fid.readline().strip().split(' ')]
+        print(most_probable_kmer(text, k, test_profile))
+
+def greedy_motif_search(dnas, k, t):
+    # initialize the motifs
+    best_motifs = [dna[:k] for dna in dnas]
+    for i in range(len(dnas[0]) - k + 1):
+        motifs = [dnas[0][i:i+k]] # seed it with the first one
+        for j in range(1, t):
+            #print(motifs)
+            profile = compute_profile(motifs)
+            (p, kmer) = most_probable_kmer(dnas[j], k, profile)
+            motifs.append(kmer)
+        #print(motifs)
+        if compute_scores_total(motifs) < compute_scores_total(best_motifs):
+            best_motifs = motifs
+    return best_motifs
+
+def exercise_01_05_b():
+
+    k = 3
+    t = 5
+    dnas = ['GGCGTTCAGGCA', 'AAGAATCAGTCA', 'CAAGGAGTTCGC', 'CACGTCAATCAC', 'CAATAATATTCG']
+
+    with codecs.open('data/dataset_159_5.txt', encoding='utf-8') as fid:
+        __ = fid.readline().strip().split(' ')
+        k = int(__[0])
+        t = int(__[1])
+        dnas = fid.readline().strip().split(' ')        
+        print(' '.join(greedy_motif_search(dnas, k, t)))
+
+exercise_01_05_b()
