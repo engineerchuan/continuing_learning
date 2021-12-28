@@ -113,4 +113,15 @@ def exercise_01_02_b():
         dnas = fid.readline().strip().split(' ')            
         print(gibbs_sampler_motif_search_wrapped(k, t, dnas, N, 20))
 
-exercise_01_02_b()
+#exercise_01_02_b()
+def quiz():
+    dnas = ['ATGAGGTC', 'GCCCTAGA', 'AAATAGAT', 'TTGTGCTA']
+    motifs = ['GTC', 'CCC', 'ATA', 'GCT']
+    
+
+    profile = compute_profile(motifs, padding=1)
+    motifs = []
+    for dna in dnas:
+        (p, kmer) = most_probable_kmer(dna, 3, profile)
+        motifs.append(kmer)
+    print(motifs)
