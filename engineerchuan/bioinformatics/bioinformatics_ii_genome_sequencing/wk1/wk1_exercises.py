@@ -171,6 +171,50 @@ def exercise_01_01_e():
     # they are the same
 
 
-exercise_01_01_e()
+def graph_from_k_mers(kmers):
+    # a collection of patterns of length k
+    # a de brujin graph adjacency list
+    k = len(kmers[0])
+    #adjacency = overlap_graph_problem(kmers)
+    #print(adjacency)
+    #de_brujin_graph = dict()
+    #for first in adjacency:
+    #    if first[:(k-1)] not in de_brujin_graph:
+    ##        de_brujin_graph[first[:(k-1)]] = []
+    #    de_brujin_graph[first[:(k-1)]].append(first[1:])#
 
+    #for second in adjacency[first]:
+    #        if second[:(k-1)] not in de_brujin_graph:
+    #            de_brujin_graph[second[:(k-1)]] = []
+    #        de_brujin_graph[second[:(k-1)]].append(second[1:])                
+    #for k in de_brujin_graph:
+    #   de_brujin_graph[k] = list(set(de_brujin_graph[k]))
+    #return de_brujin_graph
+    adjacency = dict()
+    for sliced in kmers:
+        first_k_minus_one_mer = sliced[:-1]
+        second_k_minus_one_mer = sliced[1:]
 
+        if first_k_minus_one_mer not in adjacency:
+            adjacency[first_k_minus_one_mer] = []
+        adjacency[first_k_minus_one_mer].append(second_k_minus_one_mer)
+    return adjacency
+
+def pretty_print_graph_from_k_mers(kmers):
+    adjacency_graph = graph_from_k_mers(kmers)
+    for node1 in adjacency_graph:
+        print("%s -> %s" % (node1, ",".join(adjacency_graph[node1])))    
+
+def exercise_01_01_f():
+    #if True:
+    #    kmers = ['GAGG','CAGG','GGGG','GGGA','CAGG','AGGG','GGAG']
+    with codecs.open('data/dataset_200_8.txt', encoding='utf-8') as fid:
+        kmers = []
+        line = fid.readline()
+        while line != "":
+            kmers.append(line.strip())
+            line = fid.readline()        
+      
+        pretty_print_graph_from_k_mers(kmers)
+
+construct_universal_k_string(3)
