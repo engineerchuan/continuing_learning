@@ -96,7 +96,31 @@ def exercise_01_01_c():
         pretty_print_overlap_graph(k_mer_patterns)
 
 
-exercise_01_01_c()
+def construct_universal_k_string(k):
+    # use brute force method
+    # 1.) Generate all possible strings
+    import itertools
+    all_possible = map(''.join, itertools.product('01', repeat=k))
 
+    # breadth first search
+    def helper(constructed, left):
+        #print(constructed, left)
+        if len(left) == 0:
+            return [constructed]
+        elif constructed == '':
+            subanswers = []
+            for candidate in left:
+                __ = helper(candidate, [x for x in left if x != candidate])
+                subanswers += __
+            return subanswers
+        else:
+            subanswers = []
+            for candidate in left:
+                #print("*"*80)
+                if constructed[(-k+1):] == candidate[:(k-1)]:
+                    #print("recursive path")
+                    __ = helper(constructed + candidate[-1], [x for x in left if x != candidate])
+                    subanswers += [x for x in __ if len(x) == (len(all_possible) + (k-1))]
+            return subanswers
+    print(helper('', all_possible))
 
-    
