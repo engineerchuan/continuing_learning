@@ -124,3 +124,53 @@ def construct_universal_k_string(k):
             return subanswers
     print(helper('', all_possible))
 
+def path_graph(text, k):
+    # return adjacency list
+    adjacency = dict()
+    for i in range(len(text) - k + 1):
+        sliced = text[i:i+k]
+        first_k_minus_one_mer = sliced[:-1]
+        second_k_minus_one_mer = sliced[1:]
+
+        if first_k_minus_one_mer not in adjacency:
+            adjacency[first_k_minus_one_mer] = []
+        adjacency[first_k_minus_one_mer].append(second_k_minus_one_mer)
+    return adjacency
+
+def pretty_print_path_graph(text, k):
+    adjacency_graph = path_graph(text, k)
+    for node1 in adjacency_graph:
+        print("%s -> %s" % (node1, ",".join(adjacency_graph[node1])))
+
+
+def exercise_01_01_d():
+    if True:
+        k = 4
+        text = 'AAGATTCTCTAAGA'
+        #overlap_graph_problem(k_mer_patterns)
+    with codecs.open('data/dataset_199_6.txt', encoding='utf-8') as fid:
+        k = int(fid.readline().strip())
+        text = fid.readline().strip()
+       
+        pretty_print_path_graph(text, k)
+
+
+def exercise_01_01_e():
+    # question 1
+    # no you could not reconstruct it
+    # question 2
+    print("2 mer")
+    pretty_print_path_graph('TAATGCCATGGGATGTT', 2)
+    print("3 mer")
+    pretty_print_path_graph('TAATGCCATGGGATGTT', 3)
+    print("4 mer")
+    pretty_print_path_graph('TAATGCCATGGGATGTT', 4)
+    # question 3
+    pretty_print_path_graph('TAATGCCATGGGATGTT', 3)
+    pretty_print_path_graph('TAATGGGATGCCATGTT', 3)
+    # they are the same
+
+
+exercise_01_01_e()
+
+
