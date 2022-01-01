@@ -122,7 +122,7 @@ def construct_universal_k_string(k):
                     __ = helper(constructed + candidate[-1], [x for x in left if x != candidate])
                     subanswers += [x for x in __ if len(x) == (len(all_possible) + (k-1))]
             return subanswers
-    print(helper('', all_possible))
+    return helper('', all_possible)
 
 def path_graph(text, k):
     # return adjacency list
@@ -217,4 +217,4 @@ def exercise_01_01_f():
       
         pretty_print_graph_from_k_mers(kmers)
 
-construct_universal_k_string(3)
+print(len(construct_universal_k_string(3)))
