@@ -69,12 +69,7 @@ def exercise_01_01_a():
     print('->'.join([str(x) for x in cycle]))
 
 
-def eulerian_path(adjacency_map):
-    # i will build upon eulerian_cycle
-    # first compute the in degrees and outdegrees of each node.
-    # find the two that are inbalanced, and draw the edge
-    # then find the cycle starting with the inbalanced node.
-    # then lop off the last one
+def compute_in_degree_out_degree(adjacency_map):
     in_degree_out_degree = dict()
     # set the out degrees
     for key in adjacency_map:
@@ -88,6 +83,15 @@ def eulerian_path(adjacency_map):
             if value not in in_degree_out_degree:
                 in_degree_out_degree[value] = [0, 0]
             in_degree_out_degree[value][0] += 1
+    return in_degree_out_degree
+
+def eulerian_path(adjacency_map):
+    # i will build upon eulerian_cycle
+    # first compute the in degrees and outdegrees of each node.
+    # find the two that are inbalanced, and draw the edge
+    # then find the cycle starting with the inbalanced node.
+    # then lop off the last one
+    in_degree_out_degree = compute_in_degree_out_degree(adjacency_map)
     # find the one node with in degree of 0
     #print(in_degree_out_degree)
     origin = [x for x in in_degree_out_degree if in_degree_out_degree[x][0] == (in_degree_out_degree[x][1]-1) ][0]
@@ -186,8 +190,6 @@ def string_reconstruction_k_d(patterns, k, d):
     seconds = [x[k+1:] for x in path]
     firsts_unrolled = firsts[0] + ''.join([x[-1] for x in firsts[1:]])
     seconds_unrolled = seconds[0] + ''.join([x[-1] for x in seconds[1:]])
-    #print(firsts_unrolled)
-    #print(seconds_unrolled)
     return firsts_unrolled[:k+d+1] + seconds_unrolled
 
 
@@ -207,5 +209,90 @@ def exercise_01_01_d():
             line = fid.readline()           
         print(string_reconstruction_k_d(patterns, k, d))
     
-exercise_01_01_d()
-    
+def maximal_non_branching_paths(adjacency_map):
+    in_degree_out_degree = compute_in_degree_out_degree(adjacency_map)
+    paths = []
+    existing_cycle_nodes = []
+    for node in adjacency_map:
+        in_degree = in_degree_out_degree[node][0]
+        out_degree = in_degree_out_degree[node][1]
+        if in_degree != 1 or out_degree != 1:
+            if out_degree > 0:
+                for adjacent in adjacency_map[node]:
+                    start = adjacent
+                    path = [node, start]
+                    while in_degree_out_degree[start][0] == 1 and in_degree_out_degree[start][1] == 1:
+                        next = adjacency_map[start][0]
+                        path.append(next)
+                        #if next == path[0]:
+                        #    break
+                        start = next
+                    paths.append(path)
+        elif in_degree == 1 and out_degree == 1 and node not in existing_cycle_nodes:
+            start = node
+            path = [node]
+            while in_degree_out_degree[start][0] == 1 and in_degree_out_degree[start][1] == 1:
+                next = adjacency_map[start][0]
+                path.append(next)
+                if next == path[0]:
+                    # detected a cycle
+                    paths.append(path)
+                    existing_cycle_nodes += list(set(path))
+                    break
+                start = next
+
+    # now handle the cycles
+
+    return paths
+
+
+def exercise_02_04_b():
+    if True:
+        adjacency_map = {1:[2], 2:[3], 3:[4,5], 6:[7], 7:[6]}
+
+    with codecs.open('data/dataset_6207_2.txt', encoding='utf-8') as fid:
+
+        adjacency_map = dict()
+        line = fid.readline()
+        while line != "":
+            tuples = line.split(' -> ')
+            key_ = int(tuples[0])
+            values_ = [int(x) for x in tuples[1].split(',')]
+            adjacency_map[key_] = values_
+            line = fid.readline()   
+        paths = maximal_non_branching_paths(adjacency_map)
+        for path in paths:
+            print '->'.join([str(x) for x in path])
+
+
+def generate_contigs_from_reads(patterns):
+    adjacency_map = graph_from_k_mers(patterns)
+    paths = maximal_non_branching_paths(adjacency_map)
+    contigs = []
+    for path in paths:
+        contigs.append(path[0] + ''.join([x[-1] for x in path[1:]]))
+    contigs.sort()
+    return contigs
+    #path = eulerian_path(graph)
+    #k = (len(path[0]) - 1) // 2
+    #firsts = [x[:k] for x in path]
+    ##seconds = [x[k+1:] for x in path]
+    #firsts_unrolled = firsts[0] + ''.join([x[-1] for x in firsts[1:]])
+    #seconds_unrolled = seconds[0] + ''.join([x[-1] for x in seconds[1:]])
+    #return firsts_unrolled[:k+d+1] + seconds_unrolled
+
+
+def exercise_02_04_c():
+    if True:
+        patterns = ['ATG','ATG','TGT','TGG','CAT','GGA','GAT','AGA']
+    with codecs.open('data/dataset_205_5.txt', encoding='utf-8') as fid:
+        patterns = []
+        line = fid.readline()
+        while line != "":
+            patterns.append(line.strip())
+            line = fid.readline()    
+        contigs = generate_contigs_from_reads(patterns)
+        print(' '.join(contigs))
+
+
+exercise_02_04_c()
