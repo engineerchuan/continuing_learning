@@ -149,9 +149,63 @@ def solve_universal_string(k):
     # adjust for the fact it is a circular string
     return cycle[0] + ''.join([x[-1] for x in cycle[1:-(k-1)]])
 
-print(solve_universal_string(9))
+def generate_paired_k_mer_composition(dna, k, d):
+    results = []
+    for i in range(len(dna) - k - k - d + 1):
+        first = dna[i:i+k]
+        second = dna[i+k+d:i+k+d+k]
+        results.append((first, second))
+    results.sort()
+    return results
+
+#print(solve_universal_string(9))
 #print(len('0000110010111101'))
+#results = generate_paired_k_mer_composition('TAATGCCATGGGATGTT', 3, 2)
+#print(' '.join(['(%s|%s)' % (first, second) for (first, second) in results]))
+
+def graph_from_k_mer_pairs(kmers):
+    # these are pairs separated by |
+    k = (len(kmers[0]) - 1) // 2
+    adjacency = dict()
+    for sliced in kmers:
+        first_k_minus_one_mer = sliced[:k-1] + '|' + sliced[k+1:2*k] 
+        second_k_minus_one_mer = sliced[1:k] + '|' + sliced[k+2:] 
+
+        if first_k_minus_one_mer not in adjacency:
+            adjacency[first_k_minus_one_mer] = []
+        adjacency[first_k_minus_one_mer].append(second_k_minus_one_mer)
+    return adjacency
 
 
+def string_reconstruction_k_d(patterns, k, d):
+    graph = graph_from_k_mer_pairs(patterns)
+    #print(graph)
+    path = eulerian_path(graph)
+    k = (len(path[0]) - 1) // 2
+    firsts = [x[:k] for x in path]
+    seconds = [x[k+1:] for x in path]
+    firsts_unrolled = firsts[0] + ''.join([x[-1] for x in firsts[1:]])
+    seconds_unrolled = seconds[0] + ''.join([x[-1] for x in seconds[1:]])
+    #print(firsts_unrolled)
+    #print(seconds_unrolled)
+    return firsts_unrolled[:k+d+1] + seconds_unrolled
 
 
+def exercise_01_01_d():
+    patterns = ['GAGA|TTGA','TCGT|GATG','CGTG|ATGT','TGGT|TGAG','GTGA|TGTT','GTGG|GTGA','TGAG|GTTG','GGTC|GAGA','GTCG|AGAT']
+
+    k = 4
+    d = 2
+    with codecs.open('data/dataset_204_16.txt', encoding='utf-8') as fid:
+        patterns = []
+        __ = fid.readline().split(' ')
+        k = int(__[0])
+        d = int(__[1])
+        line = fid.readline()
+        while line != "":
+            patterns.append(line.strip())
+            line = fid.readline()           
+        print(string_reconstruction_k_d(patterns, k, d))
+    
+exercise_01_01_d()
+    

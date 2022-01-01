@@ -216,5 +216,3 @@ def exercise_01_01_f():
             line = fid.readline()        
       
         pretty_print_graph_from_k_mers(kmers)
-
-print(len(construct_universal_k_string(3)))
