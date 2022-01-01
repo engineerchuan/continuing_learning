@@ -182,8 +182,9 @@ def graph_from_k_mer_pairs(kmers):
 
 
 def string_reconstruction_k_d(patterns, k, d):
+    # TBD - this did not pass the quiz
+    # it did pass the exercise.  Something is worng here
     graph = graph_from_k_mer_pairs(patterns)
-    #print(graph)
     path = eulerian_path(graph)
     k = (len(path[0]) - 1) // 2
     firsts = [x[:k] for x in path]
@@ -295,4 +296,15 @@ def exercise_02_04_c():
         print(' '.join(contigs))
 
 
-exercise_02_04_c()
+def quiz():
+    patterns = ['AAAT','AATG','ACCC','ACGC','ATAC','ATCA','ATGC','CAAA','CACC','CATA','CATC','CCAG','CCCA','CGCT','CTCA','GCAT','GCTC','TACG','TCAC','TCAT','TGCA']
+
+
+    print(string_reconstruction(patterns))
+
+    patterns = ['ACC|ATA','ACT|ATT','ATA|TGA','ATT|TGA','CAC|GAT','CCG|TAC','CGA|ACT','CTG|AGC','CTG|TTC','GAA|CTT','GAT|CTG','GAT|CTG','TAC|GAT','TCT|AAG','TGA|GCT','TGA|TCT','TTC|GAA']
+
+    print(string_reconstruction_k_d(patterns, 3, 1))
+
+
+quiz()
